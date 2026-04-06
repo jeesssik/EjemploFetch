@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Guía práctica: fetch API</title>
+  <style>
+    :root{
+      --bg-1: #f8fafc;
+      --bg-2: #eef2ff;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --accent-start: #06b6d4;
+      --accent-end: #7c3aed;
+      --glass: rgba(11,18,32,0.04);
+      --radius: 12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{height:100%}
+
+    body{
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      margin:0;
+      background: linear-gradient(180deg,var(--bg-1),var(--bg-2));
+      color:#0b1220;
+      padding:36px 20px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+    }
+
+    .container{
+      width:100%;
+      max-width:980px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,250,252,0.98));
+      border-radius: var(--radius);
+      box-shadow: 0 18px 40px rgba(2,6,23,0.10);
+      padding:28px;
+      border: 1px solid var(--glass);
+    }
+
+    header{display:flex;align-items:center;gap:16px;margin-bottom:6px}
+    header h1{font-size:20px;margin:0}
+    p.lead{margin:0;color:var(--muted)}
+
+    section{margin:18px 0;padding:16px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.98));border:1px solid rgba(15,23,36,0.03)}
+
+    h2{margin:0 0 8px;font-size:16px}
+    .meta{color:var(--muted);font-size:14px}
+
+    .example{display:grid;grid-template-columns:1fr 340px;grid-template-rows:auto 1fr;gap:16px;align-items:start}
+    .example-info{grid-column:1 / 3}
+    .example-code{grid-column:1 / 2}
+    .example-controls{grid-column:2 / 3;align-self:start}
+    @media(max-width:860px){.example{grid-template-columns:1fr}}
+
+    pre{background:#0b1220;color:#e6f7ff;padding:12px;border-radius:10px;overflow:auto;font-size:13px;line-height:1.4;font-family:var(--mono)}
+
+    .controls{display:flex;gap:8px;align-items:center}
+
+    button{
+      appearance:none;border:0;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700;color:#fff;background:linear-gradient(90deg,var(--accent-start),var(--accent-end));box-shadow:0 8px 20px rgba(124,58,237,0.12);transition:transform .12s ease,box-shadow .12s ease,opacity .12s ease}
+    button:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(124,58,237,0.14)}
+    button.ghost{background:transparent;color:var(--muted);box-shadow:none;font-weight:600}
+
+    .output{background:linear-gradient(180deg,#fbfdff,#ffffff);border:1px solid rgba(15,23,36,0.04);padding:14px;border-radius:10px;min-height:80px;white-space:pre-wrap;color:#0b1220;font-family:var(--mono);font-size:13px}
+
+    img.output-avatar{width:120px;border-radius:12px;display:block;margin:0 auto 10px;box-shadow:0 6px 20px rgba(2,6,23,0.06)}
+
+    .badge{display:inline-block;padding:6px 8px;background:rgba(6,182,212,0.08);color:var(--accent-start);border-radius:999px;font-weight:700;font-size:12px}
+
+    ul{margin:8px 0 0 18px}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Guía práctica: API <code>fetch</code></h1>
+    <p class="lead">Explicación breve, pasos y ejemplos interactivos para aprender a usar <code>fetch</code> en el navegador.</p>
+
+    <section>
+      <h2>¿Qué es <code>fetch</code>?</h2>
+      <p class="meta">Es una API nativa del navegador para realizar peticiones HTTP de forma asíncrona. Devuelve una Promise que resuelve en un objeto <code>Response</code>.</p>
+    </section>
+
+    <section>
+      <h2>Cómo funciona (paso a paso)</h2>
+      <ol>
+        <li>Llamas a <code>fetch(url, options)</code>. Opcional: <code>method</code>, <code>headers</code>, <code>body</code>.</li>
+        <li>Recibes una Promise; cuando resuelve obtienes un <code>Response</code>.</li>
+        <li>Compruebas <code>response.ok</code> o <code>response.status</code> para detectar errores HTTP.</li>
+        <li>Lees el cuerpo con <code>response.json()</code>, <code>response.text()</code> o <code>response.blob()</code> (estas también devuelven Promises).</li>
+        <li>Manejas errores de red con <code>try/catch</code> o <code>.catch()</code>. Nota: <code>fetch</code> RECHAZA la Promise solo por fallos de red; respuestas 4xx/5xx no rechazan por sí mismas.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Ejemplos interactivos</h2>
+
+      <div class="example" style="margin-bottom:12px">
+        <div class="example-info">
+          <h3>1) GET simple (Random User)</h3>
+          <p class="meta">Obtiene un usuario aleatorio desde <code>randomuser.me</code> y muestra su foto y nombre.</p>
+        </div>
+
+        <pre class="example-code"><code>// Código usado en el ejemplo:
+async function simpleGet(){
+  const res = await fetch('https://randomuser.me/api/');
+  if (!res.ok) throw new Error(res.status);
+  const data = await res.json();
+  return data.results[0];
+}</code></pre>
+
+        <div class="example-controls">
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <button id="run-get">Ejecutar GET</button>
+            <button id="clear-get">Limpiar</button>
+          </div>
+          <div id="out-get" class="output">Salida del GET aquí</div>
+        </div>
+      </div>
+
+      <div class="example" style="margin-bottom:12px">
+        <div class="example-info">
+          <h3>2) POST JSON (jsonplaceholder)</h3>
+          <p class="meta">Envía un objeto JSON a <code>jsonplaceholder.typicode.com</code> (API de prueba).</p>
+        </div>
+
+        <pre class="example-code"><code>// Código usado en el ejemplo:
+async function postJson(){
+  const res = await fetch('https://jsonplaceholder.typicode.com/posts',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({title:'Hola',body:'Contenido',userId:1})
+  });
+  return await res.json();
+}
+          </code></pre>
+
+        <div class="example-controls">
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <button id="run-post">Ejecutar POST</button>
+            <button id="clear-post">Limpiar</button>
+          </div>
+          <div id="out-post" class="output">Salida del POST aquí</div>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="example-info">
+          <h3>3) Manejo de errores y <code>response.ok</code></h3>
+          <p class="meta">Demuestra comprobar <code>response.ok</code> y capturar excepciones.</p>
+        </div>
+
+        <pre class="example-code"><code>// Código usado:
+async function withErrors(){
+  try{
+    const res = await fetch('https://httpstat.us/500');
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.text();
+  }catch(e){
+    throw e;
+  }
+}
+          </code></pre>
+
+        <div class="example-controls">
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <button id="run-err">Probar error</button>
+            <button id="clear-err">Limpiar</button>
+          </div>
+          <div id="out-err" class="output">Salida de errores aquí</div>
+        </div>
+      </div>
+
+    </section>
+
+    <section>
+      <h2>Buenas prácticas rápidas</h2>
+      <ul>
+        <li>Comprobar <code>response.ok</code> antes de procesar el cuerpo.</li>
+        <li>Enviar <code>Content-Type: application/json</code> cuando mandes JSON.</li>
+        <li>Manejar CORS en el servidor si llamas a otro origen.</li>
+        <li>Usar <code>try/catch</code> con <code>async/await</code> o <code>.catch()</code> para errores de red.</li>
+      </ul>
+    </section>
+
+  </div>
+
+  <script>
+    // Helpers
+    function show(el, value){ el.textContent = typeof value === 'string' ? value : JSON.stringify(value, null, 2) }
+    function clear(el){ el.textContent = '' }
+
+    // GET
+    document.getElementById('run-get').addEventListener('click', async function(){
+      const out = document.getElementById('out-get');
+      show(out, 'Cargando...')
+      try{
+        const res = await fetch('https://randomuser.me/api/');
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const user = data.results[0];
+        // Mostrar foto y nombre (contenido enriquecido)
+        out.innerHTML = '';
+        const img = document.createElement('img'); img.src = user.picture.large; img.alt = 'avatar'; img.style.width='120px'; img.style.borderRadius='10px'; img.style.display='block'; img.style.margin='0 auto 8px';
+        out.appendChild(img);
+        const name = document.createElement('div'); name.textContent = user.name.title + ' ' + user.name.first + ' ' + user.name.last; name.style.fontWeight='700'; name.style.textAlign='center'; out.appendChild(name);
+      }catch(e){ show(out, 'Error: ' + e.message) }
+    })
+    document.getElementById('clear-get').addEventListener('click', function(){ clear(document.getElementById('out-get')) })
+
+    // POST
+    document.getElementById('run-post').addEventListener('click', async function(){
+      const out = document.getElementById('out-post'); show(out,'Enviando...')
+      try{
+        const res = await fetch('https://jsonplaceholder.typicode.com/posts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:'Hola',body:'Contenido',userId:1})});
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json(); show(out,json)
+      }catch(e){ show(out,'Error: ' + e.message) }
+    })
+    document.getElementById('clear-post').addEventListener('click', function(){ clear(document.getElementById('out-post')) })
+
+    // Error example
+    document.getElementById('run-err').addEventListener('click', async function(){
+      const out = document.getElementById('out-err'); show(out,'Probando...')
+      try{
+        const res = await fetch('https://httpstat.us/500');
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        const text = await res.text(); show(out,text)
+      }catch(e){ show(out,'Capturado: ' + e.message) }
+    })
+    document.getElementById('clear-err').addEventListener('click', function(){ clear(document.getElementById('out-err')) })
+  </script>
+</body>
+</html>
