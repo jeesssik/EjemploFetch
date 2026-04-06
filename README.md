@@ -63,17 +63,7 @@ async function enviarDatos(payload) {
 - `css/style.css`: estilos básicos del proyecto.
 - `js/script.js`: código JavaScript; aquí es donde se colocan las llamadas `fetch`.
 
-Para ver y probar el proyecto, simplemente abre `index.html` en un navegador. Si tu `fetch` apunta a APIs externas o si el navegador bloquea peticiones por razones de CORS o por usar el protocolo `file://`, ejecuta un servidor local:
-
-Usando Python (puede variar según tu instalación):
-
-```bash
-python -m http.server 8000
-# o en algunas instalaciones de Windows:
-py -m http.server 8000
-```
-
-O usa la extensión Live Server de VS Code para servir la carpeta del proyecto.
+Para ver y probar el proyecto, usa la extensión Live Server de VS Code para servir la carpeta del proyecto.
 
 ## Notas y buenas prácticas
 - Comprueba siempre `response.ok` antes de procesar datos.
